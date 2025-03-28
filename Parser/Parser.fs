@@ -8,14 +8,14 @@ type TypeDescription = {
     TypeVariables : TypeDescription list
 }
 
-let allowedChar = letter <|> digit <|> pchar '_'
+let allowedTypeNameChar = letter <|> digit <|> pchar '_'
 
 let namespaceOrTypeName =
-    letter .>>. many allowedChar
+    letter .>>. many allowedTypeNameChar
     |>> fun (head, rest) -> System.String.Concat(head :: rest)
 
 let numberedTypeVars  =
-    pchar '`' >>. pint32
+    attempt (pchar '`' >>. pint32)
     |>> fun count -> [1..count]
     |>> List.map (fun n -> {
         Namespace = []
@@ -26,13 +26,21 @@ let numberedTypeVars  =
 let (parseFullType : Parser<TypeDescription,unit>), parseFullTypeRef = createParserForwardedToRef()
 
 let explicitNumberedTypeVars =
-    between (pchar '`' >>. many1 digit .>> pchar '[') (pchar ']') (sepBy1 parseFullType (spaces .>> pchar ',' .>> spaces))
+    between
+        (pchar '`' >>. many1 digit .>> pchar '[')
+        (pchar ']')
+        (sepBy1 parseFullType (spaces .>> pchar ',' .>> spaces))
+    |> attempt
 
 let explicitTypeVars =
-    between (pchar '<') (pchar '>') (sepBy1 parseFullType (spaces .>> pchar ',' .>> spaces))
+    between
+        (pchar '<')
+        (pchar '>')
+        (sepBy1 parseFullType (spaces .>> pchar ',' .>> spaces))
+    |> attempt
 
 let typeVars =
-    (attempt explicitNumberedTypeVars) <|> numberedTypeVars <|> explicitTypeVars
+    explicitNumberedTypeVars <|> numberedTypeVars <|> explicitTypeVars
 
 parseFullTypeRef.Value <-
     parse {
@@ -55,11 +63,6 @@ let complicatedType: Parser<TypeDescription, unit> =
             then fail "Type does not have namespace or type variables"
             else preturn t
     )
-
-let parseType (str : string) : Result<TypeDescription, string> =
-    match run parseFullType str with
-    | Success(result, _, _) -> Result.Ok result
-    | Failure(err, _, _) -> Result.Error err
 
 type MessagePart = Text of string | Type of TypeDescription
 

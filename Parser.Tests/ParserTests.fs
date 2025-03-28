@@ -5,6 +5,15 @@ open Xunit
 
 open Parser
 
+module Helpers =
+    open FParsec
+    let parseType (str : string) : Result<TypeDescription, string> =
+        match run parseFullType str with
+        | Success(result, _, _) -> Result.Ok result
+        | Failure(err, _, _) -> Result.Error err
+
+open Helpers
+
 [<Theory>]
 [<InlineData("MyType")>]
 [<InlineData("My_Type")>]
