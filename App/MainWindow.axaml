@@ -7,10 +7,23 @@
         x:Class="App.MainWindow"
         Title="C# Type Simplifier">
     <DockPanel Margin="10">
-        <CheckBox Name="HideNamespaces"
-                  Content="Hide Namespaces"
-                  DockPanel.Dock="Top"
-                  Margin="0,0,0,10"/>
+        <WrapPanel Margin="0,0,0,10"
+                   DockPanel.Dock="Top">
+            <CheckBox Name="HideNamespaces"
+                      Content="Hide Namespaces"
+                      DockPanel.Dock="Top"
+                      Margin="0,0,10,10"/>
+
+            <CheckBox Name="AddLineBreaks"
+                      Content="Add Line Breaks"
+                      DockPanel.Dock="Top"
+                      Margin="0,0,10,10"/>
+
+            <CheckBox Name="TypesOnly"
+                      Content="Only Show Types"
+                      DockPanel.Dock="Top"
+                      Margin="0,0,10,10"/>
+        </WrapPanel>
 
         <TextBox Name="InputTextBox"
                  DockPanel.Dock="Top"

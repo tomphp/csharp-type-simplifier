@@ -14,6 +14,8 @@ type MainWindow () as this =
     let mutable inputTextBox: TextBox = null
     let mutable outputTextBlock: TextBlock = null
     let mutable hideNamespaces: CheckBox = null
+    let mutable addLineBreaks: CheckBox = null
+    let mutable typesOnly: CheckBox = null
 
     do this.InitializeComponent()
 
@@ -70,14 +72,24 @@ type MainWindow () as this =
             ]
 
         let updateOutput () =
-            let text = inputTextBox.Text
-            let description = parseType text
-
+            let text = inputTextBox.Text |> Option.ofObj |> Option.defaultValue ""
+            let parts = parseMessage text
             let inlines = InlineCollection()
-            match description with
-            | Ok(desc) ->
-                for i in buildTypeInlines desc hideNamespaces.IsChecked.Value do
-                    inlines.Add(i)
+
+            match parts with
+            | Ok(parts) ->
+                for part in parts do
+                    match part with
+                    | Text(str) ->
+                        if not typesOnly.IsChecked.Value then
+                            inlines.Add(Run(str, Foreground = SolidColorBrush Colors.Lavender))
+                        if addLineBreaks.IsChecked.Value then
+                            inlines.Add(Run "\n")
+                    | Type(desc) ->
+                        for i in buildTypeInlines desc hideNamespaces.IsChecked.Value do
+                            inlines.Add(i)
+                        if addLineBreaks.IsChecked.Value then
+                            inlines.Add(Run "\n")
             | Error(msg) ->
                 let error = Run "Failed to parse type\n"
                 error.Foreground <- SolidColorBrush(Colors.Red)
@@ -96,7 +108,11 @@ type MainWindow () as this =
         inputTextBox <- this.FindControl<TextBox>("InputTextBox")
         outputTextBlock <- this.FindControl<TextBlock>("OutputTextBlock")
         hideNamespaces <- this.FindControl<CheckBox>("HideNamespaces")
+        addLineBreaks <- this.FindControl<CheckBox>("AddLineBreaks")
+        typesOnly <- this.FindControl<CheckBox>("TypesOnly")
 
         inputTextBox.TextChanged.Add(fun _ -> updateOutput())
         hideNamespaces.IsCheckedChanged.Add(fun _ -> updateOutput())
+        addLineBreaks.IsCheckedChanged.Add(fun _ -> updateOutput())
+        typesOnly.IsCheckedChanged.Add(fun _ -> updateOutput())
 
