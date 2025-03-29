@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="FunctionalUtils.fs" />
+    <Compile Include="Rendering.fs" />
     <Compile Include="MainWindow.axaml.fs" />
     <Compile Include="App.axaml.fs"/>
     <Compile Include="Program.fs" />
