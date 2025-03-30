@@ -7,7 +7,8 @@ open Parser
 
 module Helpers =
     open FParsec
-    let parseType (str : string) : Result<TypeDescription, string> =
+
+    let parseType (str: string) : Result<TypeDescription, string> =
         match run parseFullType str with
         | Success(result, _, _) -> Result.Ok result
         | Failure(err, _, _) -> Result.Error err
@@ -20,8 +21,13 @@ open Helpers
 [<InlineData("My123Type")>]
 let ``parseType given top top-level type returns type name`` str =
     let actual = parseType str
-    let expected : Result<TypeDescription, string> =
-        Result.Ok { Namespace = []; TypeName = str; TypeVariables = [] }
+
+    let expected: Result<TypeDescription, string> =
+        Result.Ok
+            { Namespace = []
+              TypeName = str
+              TypeVariables = [] }
+
     actual |> should equal expected
 
 [<Theory>]
@@ -29,8 +35,13 @@ let ``parseType given top top-level type returns type name`` str =
 [<InlineData("A.B.C.E", "A.B.C", "E")>]
 let ``parseType given namespaced type returns type name`` (str, ns: string, typeName) =
     let actual = parseType str
-    let expected : Result<TypeDescription, string> =
-        Result.Ok { Namespace = ns.Split('.') |> List.ofArray; TypeName = typeName; TypeVariables = [] }
+
+    let expected: Result<TypeDescription, string> =
+        Result.Ok
+            { Namespace = ns.Split('.') |> List.ofArray
+              TypeName = typeName
+              TypeVariables = [] }
+
     actual |> should equal expected
 
 [<Theory>]
@@ -45,14 +56,19 @@ let ``parseType given invalid typename type returns error`` str =
 [<InlineData("TwoType`2", "TwoType", "T1,T2")>]
 let ``parseType given numbered generic type returns Tn type variables`` (str, typeName, typeVars: string) =
     let actual = parseType str
-    let expected :  Result<TypeDescription, string> =
-        Result.Ok {
-            Namespace = []
-            TypeName = typeName
-            TypeVariables = typeVars.Split(',')
-              |> List.ofArray
-              |> List.map (fun tn -> { Namespace = []; TypeName = tn; TypeVariables = [] })
-            }
+
+    let expected: Result<TypeDescription, string> =
+        Result.Ok
+            { Namespace = []
+              TypeName = typeName
+              TypeVariables =
+                typeVars.Split(',')
+                |> List.ofArray
+                |> List.map (fun tn ->
+                    { Namespace = []
+                      TypeName = tn
+                      TypeVariables = [] }) }
+
     actual |> should equal expected
 
 [<Theory>]
@@ -63,19 +79,23 @@ let ``parseType given numbered generic type returns Tn type variables`` (str, ty
 [<InlineData("A`2[B , C]", "A", "B,C")>]
 let ``parseType given numbered & typed generic type returns type variables`` (str, typeName, typeVars: string) =
     let actual = parseType str
-    let expected : Result<TypeDescription, string> =
-        Result.Ok {
-            Namespace = []
-            TypeName = typeName
-            TypeVariables = typeVars.Split(',')
-              |> List.ofArray
-              |> List.map (fun subType ->
-                  let parts = subType.Split('.')
-                  let subNamespace = parts[..parts.Length-2] |> List.ofArray
-                  let subTypeName = parts[parts.Length-1]
-                  { Namespace = subNamespace; TypeName = subTypeName; TypeVariables = [] }
-               )
-            }
+
+    let expected: Result<TypeDescription, string> =
+        Result.Ok
+            { Namespace = []
+              TypeName = typeName
+              TypeVariables =
+                typeVars.Split(',')
+                |> List.ofArray
+                |> List.map (fun subType ->
+                    let parts = subType.Split('.')
+                    let subNamespace = parts[.. parts.Length - 2] |> List.ofArray
+                    let subTypeName = parts[parts.Length - 1]
+
+                    { Namespace = subNamespace
+                      TypeName = subTypeName
+                      TypeVariables = [] }) }
+
     actual |> should equal expected
 
 [<Theory>]
@@ -86,56 +106,63 @@ let ``parseType given numbered & typed generic type returns type variables`` (st
 [<InlineData("A<B , C>", "A", "B,C")>]
 let ``parseType given typed generic type returns type variables`` (str, typeName, typeVars: string) =
     let actual = parseType str
-    let expected : Result<TypeDescription, string> =
-        Result.Ok {
-            Namespace = []
-            TypeName = typeName
-            TypeVariables = typeVars.Split(',')
-              |> List.ofArray
-              |> List.map (fun subType ->
-                  let parts = subType.Split('.')
-                  let subNamespace = parts[..parts.Length-2] |> List.ofArray
-                  let subTypeName = parts[parts.Length-1]
-                  { Namespace = subNamespace; TypeName = subTypeName; TypeVariables = [] }
-               )
-            }
+
+    let expected: Result<TypeDescription, string> =
+        Result.Ok
+            { Namespace = []
+              TypeName = typeName
+              TypeVariables =
+                typeVars.Split(',')
+                |> List.ofArray
+                |> List.map (fun subType ->
+                    let parts = subType.Split('.')
+                    let subNamespace = parts[.. parts.Length - 2] |> List.ofArray
+                    let subTypeName = parts[parts.Length - 1]
+
+                    { Namespace = subNamespace
+                      TypeName = subTypeName
+                      TypeVariables = [] }) }
+
     actual |> should equal expected
 
 [<Fact>]
 let ``parseMessage given only message returns message`` () =
     let actual = parseMessage "no types here"
-    let expected : Result<MessagePart list, string> = Ok [Text "no types here"]
+    let expected: Result<MessagePart list, string> = Ok [ Text "no types here" ]
     actual |> should equal expected
 
 [<Fact>]
 let ``parseMessage given only type returns type`` () =
     let actual = parseMessage "Alpha.Beta"
-    let expected : Result<MessagePart list, string> =
-        Ok [Type {
-            Namespace = ["Alpha"]
-            TypeName = "Beta"
-            TypeVariables = []
-            }
-        ]
+
+    let expected: Result<MessagePart list, string> =
+        Ok
+            [ Type
+                  { Namespace = [ "Alpha" ]
+                    TypeName = "Beta"
+                    TypeVariables = [] } ]
+
     actual |> should equal expected
 
 [<Fact>]
 let ``parseMessage full message`` () =
     let actual = parseMessage "Type Alpha.Beta does not match type 'Beta<string>'."
-    let expected : Result<MessagePart list, string> =
-        Ok [
-            Text "Type "
-            Type {
-                Namespace = ["Alpha"]
-                TypeName = "Beta"
-                TypeVariables = []
-            }
-            Text " does not match type '"
-            Type {
-                Namespace = []
-                TypeName = "Beta"
-                TypeVariables = [{Namespace = []; TypeName = "string"; TypeVariables = []}]
-            }
-            Text "'."
-        ]
+
+    let expected: Result<MessagePart list, string> =
+        Ok
+            [ Text "Type "
+              Type
+                  { Namespace = [ "Alpha" ]
+                    TypeName = "Beta"
+                    TypeVariables = [] }
+              Text " does not match type '"
+              Type
+                  { Namespace = []
+                    TypeName = "Beta"
+                    TypeVariables =
+                      [ { Namespace = []
+                          TypeName = "string"
+                          TypeVariables = [] } ] }
+              Text "'." ]
+
     actual |> should equal expected

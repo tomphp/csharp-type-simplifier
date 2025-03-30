@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "dotnet-fsharplint": {
+      "version": "0.24.2",
+      "commands": [
+        "dotnet-fsharplint"
+      ],
+      "rollForward": false
+    },
+    "fantomas": {
+      "version": "7.0.1",
+      "commands": [
+        "fantomas"
+      ],
+      "rollForward": false
+    }
+  }
+}

@@ -10,8 +10,8 @@ open Avalonia.Media
 
 open Parser
 
-type MainWindow () as this =
-    inherit Window ()
+type MainWindow() as this =
+    inherit Window()
 
     let mutable inputTextBox: TextBox = null
     let mutable outputTextBlock: TextBlock = null
@@ -26,11 +26,18 @@ type MainWindow () as this =
             let text = inputTextBox.Text |> Option.ofObj |> Option.defaultValue ""
             let parts = parseMessage text
 
-            let runs = renderOutput hideNamespaces.IsChecked.Value addLineBreaks.IsChecked.Value typesOnly.IsChecked.Value parts
+            let runs =
+                renderOutput
+                    hideNamespaces.IsChecked.Value
+                    addLineBreaks.IsChecked.Value
+                    typesOnly.IsChecked.Value
+                    parts
 
             let inlines = InlineCollection()
+
             for run in runs do
                 inlines.Add run
+
             outputTextBlock.Inlines <- inlines
 
 #if DEBUG
@@ -44,8 +51,7 @@ type MainWindow () as this =
         addLineBreaks <- this.FindControl<CheckBox>("AddLineBreaks")
         typesOnly <- this.FindControl<CheckBox>("TypesOnly")
 
-        inputTextBox.TextChanged.Add(fun _ -> updateOutput())
-        hideNamespaces.IsCheckedChanged.Add(fun _ -> updateOutput())
-        addLineBreaks.IsCheckedChanged.Add(fun _ -> updateOutput())
-        typesOnly.IsCheckedChanged.Add(fun _ -> updateOutput())
-
+        inputTextBox.TextChanged.Add(fun _ -> updateOutput ())
+        hideNamespaces.IsCheckedChanged.Add(fun _ -> updateOutput ())
+        addLineBreaks.IsCheckedChanged.Add(fun _ -> updateOutput ())
+        typesOnly.IsCheckedChanged.Add(fun _ -> updateOutput ())
