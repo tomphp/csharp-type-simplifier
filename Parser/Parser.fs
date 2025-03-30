@@ -53,7 +53,7 @@ parseFullTypeRef.Value <-
 let complicatedType: Parser<TypeDescription, unit> =
     parseFullType
     >>= (fun (t: TypeDescription) ->
-        if t.Namespace = [] && t.TypeVariables = [] then
+        if List.isEmpty t.Namespace && List.isEmpty t.TypeVariables then
             fail "Type does not have namespace or type variables"
         else
             preturn t)
