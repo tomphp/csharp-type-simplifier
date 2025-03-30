@@ -1,12 +1,10 @@
 namespace App
 
-open App.FunctionalUtils
 open App.Rendering
 open Avalonia
 open Avalonia.Controls
 open Avalonia.Controls.Documents
 open Avalonia.Markup.Xaml
-open Avalonia.Media
 
 open Parser
 
@@ -23,21 +21,22 @@ type MainWindow() as this =
 
     member private this.InitializeComponent() =
         let updateOutput () =
+            let options =
+                { HideNamespaces = hideNamespaces.IsChecked.GetValueOrDefault false
+                  AddLineBreaks = addLineBreaks.IsChecked.GetValueOrDefault false
+                  TypesOnly = typesOnly.IsChecked.GetValueOrDefault false }
+
             let text = inputTextBox.Text |> Option.ofObj |> Option.defaultValue ""
             let parts = parseMessage text
 
             let runs =
-                renderOutput
-                    hideNamespaces.IsChecked.Value
-                    addLineBreaks.IsChecked.Value
-                    typesOnly.IsChecked.Value
-                    parts
+                parts
+                |> function
+                    | Ok(parts) -> messageParts options parts
+                    | Error(msg) -> parseError msg
 
             let inlines = InlineCollection()
-
-            for run in runs do
-                inlines.Add run
-
+            runs |> List.iter inlines.Add
             outputTextBlock.Inlines <- inlines
 
 #if DEBUG

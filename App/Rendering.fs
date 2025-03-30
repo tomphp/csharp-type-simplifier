@@ -1,64 +1,68 @@
 module App.Rendering
 
-open App.FunctionalUtils
 open Avalonia.Controls.Documents
 open Avalonia.Media
+open ListUtils
 open Parser
 
-let rec buildTypeInlines (typeDescription: TypeDescription) (hideNamespaces: bool) : Run list =
-    let namespaceRuns =
-        if typeDescription.Namespace <> [] && not hideNamespaces then
-            typeDescription.Namespace
-            |> List.map (fun n -> Run(n, Foreground = SolidColorBrush Colors.BlueViolet))
-        else
-            []
+type RenderOptions =
+    { HideNamespaces: bool
+      AddLineBreaks: bool
+      TypesOnly: bool }
 
-    let symbol =
-        Run(typeDescription.TypeName, Foreground = SolidColorBrush Colors.GreenYellow)
+let private coloredText (color: Color) (text: string) : Run =
+    Run(text, Foreground = SolidColorBrush color)
 
-    let namePart =
-        [ yield! namespaceRuns; yield symbol ]
-        |> intersperse (Run(".", Foreground = SolidColorBrush Colors.Gray))
+let private namespacePart = coloredText Colors.BlueViolet
 
+let private typeName = coloredText Colors.GreenYellow
+
+let private namespaceSeparator = coloredText Colors.Gray "."
+
+let private typeVarSeparator = coloredText Colors.Gray ", "
+
+let private namespaceParts = List.map namespacePart
+
+let fullyQualifiedType typeDescription hideNamespaces =
+    [ if not hideNamespaces then
+          yield! namespaceParts typeDescription.Namespace
+      yield typeName typeDescription.TypeName ]
+    |> intersperse namespaceSeparator
+
+let rec private buildTypeInlines (typeDescription: TypeDescription) (hideNamespaces: bool) : Run list =
     let typeVars =
-        if typeDescription.TypeVariables <> [] then
+        match typeDescription.TypeVariables with
+        | [] -> []
+        | vars ->
             [ yield Run "<"
               yield!
-                  typeDescription.TypeVariables
-                  |> List.collect (fun typeVar ->
-                      [ yield! buildTypeInlines typeVar hideNamespaces
-                        yield Run(", ", Foreground = SolidColorBrush Colors.Gray) ])
-                  |> dropLast
+                  vars
+                  |> List.map (fun var -> buildTypeInlines var hideNamespaces)
+                  |> intersperse [ typeVarSeparator ]
+                  |> List.concat
               yield Run ">" ]
-        else
-            []
 
-    [ yield! namePart; yield! typeVars ]
+    [ yield! fullyQualifiedType typeDescription hideNamespaces; yield! typeVars ]
 
-let renderMessagePart typesOnly hideNamespaces part =
+let private messagePart (options: RenderOptions) part =
     match part with
-    | Text(str) ->
-        if not typesOnly then
-            [ Run(str, Foreground = SolidColorBrush Colors.Lavender) ]
-        else
-            []
-    | Type(desc) -> buildTypeInlines desc hideNamespaces
+    | Text str when not options.TypesOnly -> [ coloredText Colors.Lavender str ]
+    | Type desc -> buildTypeInlines desc options.HideNamespaces
+    | _ -> []
 
-let renderMessageParts hideNamespaces addLineBreaks typesOnly parts =
+let messageParts (options: RenderOptions) (parts: MessagePart seq) : Run list =
     parts
-    |> Seq.map (renderMessagePart typesOnly hideNamespaces)
+    |> Seq.map (messagePart options)
     |> Seq.toList
-    |> (fun x -> if addLineBreaks then intersperse [ Run "\n" ] x else x)
+    |> (if options.AddLineBreaks then
+            intersperse [ Run "\n" ]
+        else
+            id)
     |> List.concat
 
-let renderParseError msg =
+let parseError (msg: string) : Run list =
     let error = Run "Failed to parse type\n"
     error.Foreground <- SolidColorBrush(Colors.Red)
     error.FontWeight <- FontWeight.Bold
     let errMsg = Run msg
     [ error; errMsg ]
-
-let renderOutput hideNamespaces addLineBreaks typesOnly parts =
-    match parts with
-    | Ok(parts) -> renderMessageParts hideNamespaces addLineBreaks typesOnly parts
-    | Error(msg) -> renderParseError msg

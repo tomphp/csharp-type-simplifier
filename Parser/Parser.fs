@@ -7,13 +7,13 @@ type TypeDescription =
       TypeName: string
       TypeVariables: TypeDescription list }
 
-let allowedTypeNameChar = letter <|> digit <|> pchar '_'
+let private allowedTypeNameChar = letter <|> digit <|> pchar '_'
 
-let namespaceOrTypeName =
+let private namespaceOrTypeName =
     letter .>>. many allowedTypeNameChar
     |>> fun (head, rest) -> System.String.Concat(head :: rest)
 
-let numberedTypeVars =
+let private numberedTypeVars =
     attempt (pchar '`' >>. pint32)
     |>> fun count -> [ 1..count ]
     |>> List.map (fun n ->
@@ -24,18 +24,19 @@ let numberedTypeVars =
 let (parseFullType: Parser<TypeDescription, unit>), parseFullTypeRef =
     createParserForwardedToRef ()
 
-let explicitNumberedTypeVars =
+let private explicitNumberedTypeVars =
     between
         (pchar '`' >>. many1 digit .>> pchar '[')
         (pchar ']')
         (sepBy1 parseFullType (spaces .>> pchar ',' .>> spaces))
     |> attempt
 
-let explicitTypeVars =
+let private explicitTypeVars =
     between (pchar '<') (pchar '>') (sepBy1 parseFullType (spaces .>> pchar ',' .>> spaces))
     |> attempt
 
-let typeVars = explicitNumberedTypeVars <|> numberedTypeVars <|> explicitTypeVars
+let private typeVars =
+    explicitNumberedTypeVars <|> numberedTypeVars <|> explicitTypeVars
 
 parseFullTypeRef.Value <-
     parse {
@@ -50,7 +51,7 @@ parseFullTypeRef.Value <-
               TypeVariables = tv |> Option.defaultValue [] }
     }
 
-let complicatedType: Parser<TypeDescription, unit> =
+let private complicatedType: Parser<TypeDescription, unit> =
     parseFullType
     >>= (fun (t: TypeDescription) ->
         if List.isEmpty t.Namespace && List.isEmpty t.TypeVariables then
@@ -62,7 +63,7 @@ type MessagePart =
     | Text of string
     | Type of TypeDescription
 
-let messageText: Parser<MessagePart, unit> =
+let private messageText: Parser<MessagePart, unit> =
     many1Till anyChar (eof <|> (lookAhead complicatedType >>% ()))
     |>> (System.String.Concat >> Text)
 
