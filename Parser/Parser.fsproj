@@ -6,7 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Parser.fs" />
+    <Compile Include="TypeParser.fs" />
+    <Compile Include="MessageParser.fs" />
   </ItemGroup>
 
   <ItemGroup>

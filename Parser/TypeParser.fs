@@ -1,4 +1,4 @@
-module Parser
+module Parser.TypeParser
 
 open FParsec
 
@@ -51,23 +51,10 @@ parseFullTypeRef.Value <-
               TypeVariables = tv |> Option.defaultValue [] }
     }
 
-let private complicatedType: Parser<TypeDescription, unit> =
+let parseType: Parser<TypeDescription, unit> =
     parseFullType
     >>= (fun (t: TypeDescription) ->
         if List.isEmpty t.Namespace && List.isEmpty t.TypeVariables then
             fail "Type does not have namespace or type variables"
         else
             preturn t)
-
-type MessagePart =
-    | Text of string
-    | Type of TypeDescription
-
-let private messageText: Parser<MessagePart, unit> =
-    many1Till anyChar (eof <|> (lookAhead complicatedType >>% ()))
-    |>> (System.String.Concat >> Text)
-
-let parseMessage (str: string) : Result<MessagePart list, string> =
-    match run (many ((complicatedType |>> Type |> attempt) <|> messageText)) str with
-    | Success(result, _, _) -> Result.Ok result
-    | Failure(err, _, _) -> Result.Error err

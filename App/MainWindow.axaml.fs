@@ -6,7 +6,7 @@ open Avalonia.Controls
 open Avalonia.Controls.Documents
 open Avalonia.Markup.Xaml
 
-open Parser
+open Parser.MessageParser
 
 type MainWindow() as this =
     inherit Window()

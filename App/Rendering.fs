@@ -3,7 +3,8 @@ module App.Rendering
 open Avalonia.Controls.Documents
 open Avalonia.Media
 open ListUtils
-open Parser
+open Parser.MessageParser
+open Parser.TypeParser
 
 type RenderOptions =
     { HideNamespaces: bool

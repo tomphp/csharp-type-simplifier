@@ -1,4 +1,4 @@
-module AppTests
+module App.Tests.AppTests
 
 open App
 open Avalonia
