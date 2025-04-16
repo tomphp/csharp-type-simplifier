@@ -1,0 +1,43 @@
+<div class="columns">
+  <aside class="column sidebar is-narrow">
+    <section class="section">
+      <nav class="menu">
+        <ul class="menu-list">
+          ${Menu}
+          <template id="MenuItem">
+            <li><a class="${Active}" href="${Url}">${Text}</a></li>
+          </template>
+        </ul>
+      </nav>
+    </section>
+  </aside>
+  <div class="column">
+    <section class="section">
+      ${Body}
+
+      <template id="Home">
+        <div class="content">
+          <div class="settings">
+            <label>
+              Show namespaces
+              <input type="checkbox" bind="${ToggleNamespaces}" />
+            </label>
+            <label>
+              Add line breaks
+              <input type="checkbox" bind="${AddLineBreaks}" />
+            </label>
+          </div>
+          <div class="message-input">
+            <label>
+              Message
+              <textarea bind="${ParsedMessage}"></textarea>
+            </label>
+          </div>
+          <h2 id="output-label">Result</h2>
+          <output class="parsed-output" aria-labelledby="output-label">${Output}</output>
+        </div>
+      </template>
+
+    </section>
+  </div>
+</div>
