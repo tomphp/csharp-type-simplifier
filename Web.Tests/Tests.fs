@@ -9,7 +9,7 @@ type Tests() =
     member private this.VisitPage() =
         this.Page.GotoAsync("http://localhost:5058/") |> Async.AwaitTask |> Async.Ignore
 
-    member private this.InputMessage (msg : string) =
+    member private this.InputMessage(msg: string) =
         this.Page.GetByLabel("Message").FillAsync(msg)
 
     member private this.ClickShowNamespaces() =
@@ -25,7 +25,7 @@ type Tests() =
         this.Page.GetByLabel("Result").InnerHTMLAsync()
 
     [<Xunit.Fact>]
-    member this.``inputting a boring message`` () =
+    member this.``inputting a boring message``() =
         task {
             do! this.VisitPage()
 
@@ -35,7 +35,7 @@ type Tests() =
         }
 
     [<Xunit.Fact>]
-    member this.``inputting a message with types`` () =
+    member this.``inputting a message with types``() =
         task {
             do! this.VisitPage()
 
@@ -45,7 +45,7 @@ type Tests() =
         }
 
     [<Xunit.Fact>]
-    member this.``hiding namespaces`` () =
+    member this.``hiding namespaces``() =
         task {
             do! this.VisitPage()
 
@@ -56,19 +56,24 @@ type Tests() =
         }
 
     [<Xunit.Fact>]
-    member this.``add line breaks`` () =
+    member this.``add line breaks``() =
         task {
             do! this.VisitPage()
 
             do! this.ClickAddLineBreaks()
-            do! this.InputMessage("First type is MyCompany.MyProject.MyTypeOne and second type is MyCompany.MyProject.MyTypeTwo")
+
+            do!
+                this.InputMessage(
+                    "First type is MyCompany.MyProject.MyTypeOne and second type is MyCompany.MyProject.MyTypeTwo"
+                )
 
             let! output = this.OutputText()
+
             Xunit.Assert.Matches(
                 "First type is.*<br>.*"
-                 + "MyCompany.*\..*MyProject.*\..*MyTypeOne.*.*<br>.*"
-                 + "and second type is.*<br>.*"
-                 + "MyCompany.*\..*MyProject.*\..*MyTypeTwo",
-                 output
+                + "MyCompany.*\..*MyProject.*\..*MyTypeOne.*.*<br>.*"
+                + "and second type is.*<br>.*"
+                + "MyCompany.*\..*MyProject.*\..*MyTypeTwo",
+                output
             )
         }

@@ -5,13 +5,13 @@ open Bolero
 type Page = | [<EndPoint "/">] Home
 
 type Model =
-    { page: Page
-      message: string
-      showNamespaces: bool
-      addLineBreaks: bool }
+    { Page: Page
+      Message: string
+      ShowNamespaces: bool
+      AddLineBreaks: bool }
 
 let initModel =
-    { page = Home
-      message = ""
-      showNamespaces = true
-      addLineBreaks = false }
+    { Page = Home
+      Message = ""
+      ShowNamespaces = true
+      AddLineBreaks = false }

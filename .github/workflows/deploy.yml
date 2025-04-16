@@ -1,0 +1,135 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  linter:
+    name: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install .NET SDK (9)
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 9.x
+
+      - name: Install Tools
+        run: dotnet tool restore
+
+      - name: Run FSharpLint in check mode
+        run: DOTNET_ROLL_FORWARD=latestMajor find . -name '*.fs' -maxdepth 2 -exec dotnet dotnet-fsharplint lint {} \;
+
+      - name: Run Fantomas in check mode
+        run: dotnet fantomas $(find . -name '*.fs') --check
+
+  unittests:
+    name: unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install .NET SDK (9)
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 9.x
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run unit tests in Parser.Tests
+        run: dotnet test Parser.Tests
+
+      - name: Run unit tests in App.Tests
+        run: dotnet test App.Tests
+
+  webtests:
+    name: web tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install .NET SDK (9)
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 9.x
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.x
+
+      - name: Install Tools
+        run: dotnet tool restore
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Start Web Server
+        id: start-server
+        run: |
+          dotnet build Web --no-restore
+          dotnet run --project Web &
+          echo "SERVER_PID=$!" >> $GITHUB_ENV
+
+      - name: Ensure browsers are installed
+        run: |
+          dotnet build Web.Tests --no-restore
+          pwsh Web.Tests/bin/Debug/net9.0/playwright.ps1 install --with-deps
+
+      - name: Run Playwright tests
+        run: dotnet test Web.Tests
+
+      - name: Stop Web Server
+        if: always()
+        run: kill $SERVER_PID
+
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    needs: [ unittests, webtests, linter ]
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install .NET SDK (8)
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.x
+
+      - name: Install .NET SDK (9)
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 9.x
+
+      - name: Restore dependencies
+        run: dotnet restore Web
+
+      - name: Build and publish Web project
+        run: dotnet publish Web -c Release -o release
+
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./release/wwwroot
+          publish_branch: gh-pages

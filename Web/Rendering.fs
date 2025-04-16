@@ -13,6 +13,7 @@ let private renderNamespace (description: TypeDescription) : Node =
                 attr.``class`` "message-namespace"
                 n
             }
+
             text "."
     }
 
@@ -45,9 +46,10 @@ let private renderTypeVars (renderType: TypeDescription -> Node) : TypeDescripti
     >> intersperse (text ", ")
     >> surround (text "<") (text ">")
 
-let rec private renderType (model : Model) (description: TypeDescription) : Node =
+// fsharplint:disable-next-line UnneededRecKeyword
+let rec private renderType (model: Model) (description: TypeDescription) : Node =
     concat {
-        if model.showNamespaces then
+        if model.ShowNamespaces then
             renderNamespace description
 
         renderTypename description
@@ -59,16 +61,18 @@ let rec private renderType (model : Model) (description: TypeDescription) : Node
 let private renderText (content: string) : Node =
     span {
         attr.``class`` "message-text"
-        content.Split('\n') |> List.ofArray |> List.map text |> intersperse (br {})
+        content.Split('\n') |> List.ofArray |> List.map text |> intersperse (br { })
     }
 
 let renderMessage model (msg: MessagePart list) =
     div {
         attr.``class`` "message"
+
         for part in msg do
             match part with
             | Type t -> renderType model t
             | Text t -> renderText t
-            if model.addLineBreaks then
+
+            if model.AddLineBreaks then
                 br
     }

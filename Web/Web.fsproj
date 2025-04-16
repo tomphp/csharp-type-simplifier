@@ -2,7 +2,6 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <IsTrimmable>false</IsTrimmable>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Model.fs" />
@@ -11,10 +10,10 @@
     <Compile Include="Startup.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Bolero" Version="0.*" />
-    <PackageReference Include="Bolero.Build" Version="0.*" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.*" />
-    <PackageReference Include="System.Net.Http.Json" Version="8.0.*" />
+    <PackageReference Include="Bolero" Version="0.24.39" />
+    <PackageReference Include="Bolero.Build" Version="0.24.39" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.15" />
+    <PackageReference Include="System.Net.Http.Json" Version="8.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Parser/Parser.fsproj" />
