@@ -1,43 +1,61 @@
 <div class="columns">
   <aside class="column sidebar is-narrow">
     <section class="section">
-      <nav class="menu">
-        <ul class="menu-list">
-          ${Menu}
-          <template id="MenuItem">
-            <li><a class="${Active}" href="${Url}">${Text}</a></li>
-          </template>
-        </ul>
-      </nav>
     </section>
   </aside>
+
   <div class="column">
     <section class="section">
       ${Body}
 
       <template id="Home">
-        <div class="content">
-          <div class="settings">
-            <label>
-              Show namespaces
-              <input type="checkbox" bind="${ToggleNamespaces}" />
-            </label>
-            <label>
-              Add line breaks
-              <input type="checkbox" bind="${AddLineBreaks}" />
-            </label>
-          </div>
-          <div class="message-input">
-            <label>
-              Message
-              <textarea bind="${ParsedMessage}"></textarea>
-            </label>
-          </div>
-          <h2 id="output-label">Result</h2>
-          <output class="parsed-output" aria-labelledby="output-label">${Output}</output>
+        <div class="column">
+          <section class="section">
+            <div class="content">
+              <div class="box message-input">
+                <h2 class="title is-4" id="message-label">Message</h2>
+                <label for="message" class="label">Paste error message here:</label>
+                <textarea
+                        id="message"
+                        class="textarea"
+                        rows="6"
+                        placeholder="Enter the error message here..."
+                        bind="${ParsedMessage}"
+                        aria-labelledby="message-label"
+                ></textarea>
+              </div>
+
+              <div class="box settings">
+                <h2 class="title is-4">Display Settings</h2>
+                <ul class="settings-options">
+                  <li>
+                    <label class="checkbox">
+                      <input type="checkbox" bind="${ToggleNamespaces}" />
+                      Show namespaces
+                    </label>
+                  </li>
+                  <li>
+                    <label class="checkbox">
+                      <input type="checkbox" bind="${AddLineBreaks}" />
+                      Add line breaks
+                    </label>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="box output">
+                <h2 class="title is-4" id="output-label">Result</h2>
+                <pre class="parsed-output" aria-labelledby="output-label">${Output}</pre>
+              </div>
+            </div>
+          </section>
         </div>
       </template>
-
     </section>
   </div>
+
+  <aside class="column sidebar is-narrow">
+    <section class="section">
+    </section>
+  </aside>
 </div>
