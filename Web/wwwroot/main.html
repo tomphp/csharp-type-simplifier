@@ -1,43 +1,45 @@
 <div class="columns">
   <aside class="column sidebar is-narrow">
     <section class="section">
-      <nav class="menu">
-        <ul class="menu-list">
-          ${Menu}
-          <template id="MenuItem">
-            <li><a class="${Active}" href="${Url}">${Text}</a></li>
-          </template>
-        </ul>
-      </nav>
     </section>
   </aside>
+
   <div class="column">
     <section class="section">
       ${Body}
 
       <template id="Home">
         <div class="content">
-          <div class="settings">
-            <label>
-              Show namespaces
-              <input type="checkbox" bind="${ToggleNamespaces}" />
-            </label>
-            <label>
-              Add line breaks
-              <input type="checkbox" bind="${AddLineBreaks}" />
-            </label>
-          </div>
           <div class="message-input">
-            <label>
-              Message
-              <textarea bind="${ParsedMessage}"></textarea>
-            </label>
+            <h2 id="message-label">Message</h2>
+            <label for="message">Paste error message here</label>
+            <textarea id="message" bind="${ParsedMessage}" aria-labelledby="message-label"></textarea>
           </div>
-          <h2 id="output-label">Result</h2>
-          <output class="parsed-output" aria-labelledby="output-label">${Output}</output>
+          <div class="settings">
+            <h2>Display Settings</h2>
+            <ul>
+              <li>
+                <label>
+                  <input type="checkbox" bind="${ToggleNamespaces}" />
+                  Show namespaces
+                </label>
+            </li>
+              <li>
+                <label><input type="checkbox" bind="${AddLineBreaks}" /> Add line breaks</label>
+              </li>
+            </ul>
+          </div>
+          <div class="output">
+            <h2 id="output-label">Result</h2>
+            <output class="parsed-output" aria-labelledby="output-label">${Output}</output>
+          </div>
         </div>
       </template>
-
     </section>
   </div>
+
+  <aside class="column sidebar is-narrow">
+    <section class="section">
+    </section>
+  </aside>
 </div>
