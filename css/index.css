@@ -7,6 +7,13 @@ body {
   flex-direction: column;
 }
 
+.github-fork-ribbon {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+}
+
 #main {
   flex: 1;
 }
