@@ -5,6 +5,8 @@ html, body {
 body {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
 }
 
 .github-fork-ribbon {
@@ -12,4 +14,59 @@ body {
   top: 0;
   right: 0;
   z-index: 1000;
+}
+
+#main > .columns {
+  min-height: 100%;
+}
+
+.sidebar {
+  width: 250px;
+  min-height: 100%;
+  background-color: #f8f9fa;
+}
+
+.message-input textarea {
+  width: 100%;
+  height: auto;
+  resize: vertical;
+}
+
+.output pre {
+  font-family: monospace;
+  background-color: #f4f4f4;
+  padding: 10px;
+  overflow: auto;
+  border-left: 4px solid #29adff;
+}
+
+.message {
+  font-family: monospace;
+  color: #333333;
+  background: #eaeaea;
+  padding: 10px;
+  word-wrap: break-word;
+}
+
+.settings-options {
+  list-style: none;
+  padding: 0;
+}
+
+.settings-options li {
+  margin-bottom: 0.5rem;
+}
+
+.box {
+  margin-bottom: 2rem;
+}
+
+.message-namespace {
+  font-weight: bold;
+  color: #9146dd;
+}
+
+.message-typename {
+  font-weight: bold;
+  color: #3ab54a;
 }

@@ -35,13 +35,9 @@ let homePage model dispatch =
         .Elt()
 
 let view model dispatch =
-    Main()
-        .Body(homePage model dispatch)
-        .Elt()
+    Main().Body(homePage model dispatch).Elt()
 
 type WebApp() =
     inherit ProgramComponent<Model, Message>()
-
-    override _.CssScope = CssScopes.WebApp
 
     override this.Program = Program.mkProgram (fun _ -> initModel, Cmd.none) update view
