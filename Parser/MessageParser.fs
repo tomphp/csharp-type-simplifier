@@ -5,7 +5,7 @@ open TypeParser
 
 type MessagePart =
     | Text of string
-    | Type of TypeDescription
+    | Type of FullyQualifiedTypeDescription
 
 let private messageText: Parser<MessagePart, unit> =
     many1Till anyChar (eof <|> (lookAhead parseType >>% ()))

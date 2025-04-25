@@ -18,8 +18,9 @@ let ``parseMessage given only type returns type`` () =
         Ok
             [ Type
                   { Namespace = [ "Alpha" ]
-                    TypeName = "Beta"
-                    TypeVariables = [] } ]
+                    TypeDescription =
+                      [ { TypeName = "Beta"
+                          TypeVariables = [] } ] } ]
 
     actual |> should equal expected
 
@@ -32,16 +33,19 @@ let ``parseMessage full message`` () =
             [ Text "Type "
               Type
                   { Namespace = [ "Alpha" ]
-                    TypeName = "Beta"
-                    TypeVariables = [] }
+                    TypeDescription =
+                      [ { TypeName = "Beta"
+                          TypeVariables = [] } ] }
               Text " does not match type '"
               Type
                   { Namespace = []
-                    TypeName = "Beta"
-                    TypeVariables =
-                      [ { Namespace = []
-                          TypeName = "string"
-                          TypeVariables = [] } ] }
+                    TypeDescription =
+                      [ { TypeName = "Beta"
+                          TypeVariables =
+                            [ { Namespace = []
+                                TypeDescription =
+                                  [ { TypeName = "string"
+                                      TypeVariables = [] } ] } ] } ] }
               Text "'." ]
 
     actual |> should equal expected

@@ -3,9 +3,12 @@ module Parser.TypeParser
 open FParsec
 
 type TypeDescription =
+    { TypeName: string
+      TypeVariables: FullyQualifiedTypeDescription list }
+
+and FullyQualifiedTypeDescription =
     { Namespace: string list
-      TypeName: string
-      TypeVariables: TypeDescription list }
+      TypeDescription: TypeDescription list }
 
 let private allowedTypeNameChar = letter <|> digit <|> pchar '_'
 
@@ -18,43 +21,52 @@ let private numberedTypeVars =
     |>> fun count -> [ 1..count ]
     |>> List.map (fun n ->
         { Namespace = []
-          TypeName = $"T{n}"
-          TypeVariables = [] })
+          TypeDescription =
+            [ { TypeName = $"T{n}"
+                TypeVariables = [] } ] })
 
-let (parseFullType: Parser<TypeDescription, unit>), parseFullTypeRef =
+let (fullyQualifiedTypeDescription: Parser<FullyQualifiedTypeDescription, unit>), fullyQualifiedTypeDescriptionRef =
     createParserForwardedToRef ()
 
 let private explicitNumberedTypeVars =
     between
         (pchar '`' >>. many1 digit .>> pchar '[')
         (pchar ']')
-        (sepBy1 parseFullType (spaces .>> pchar ',' .>> spaces))
+        (sepBy1 fullyQualifiedTypeDescription (spaces .>> pchar ',' .>> spaces))
     |> attempt
 
 let private explicitTypeVars =
-    between (pchar '<') (pchar '>') (sepBy1 parseFullType (spaces .>> pchar ',' .>> spaces))
+    between (pchar '<') (pchar '>') (sepBy1 fullyQualifiedTypeDescription (spaces .>> pchar ',' .>> spaces))
     |> attempt
 
 let private typeVars =
     explicitNumberedTypeVars <|> numberedTypeVars <|> explicitTypeVars
 
-parseFullTypeRef.Value <-
+let private typeDescription =
+    parse {
+        let! name = namespaceOrTypeName
+        let! vars = (opt typeVars) |>> Option.defaultValue []
+        do! followedBy (eof <|> spaces1 <|> (anyOf [ ']'; '>'; ','; '\''; '+' ] >>% ()))
+
+        return
+            { TypeName = name
+              TypeVariables = vars }
+    }
+
+fullyQualifiedTypeDescriptionRef.Value <-
     parse {
         let! ns = (many (attempt (namespaceOrTypeName .>> pchar '.')))
-        let! tn = namespaceOrTypeName
-        let! tv = (opt typeVars)
-        do! followedBy (eof <|> spaces1 <|> (anyOf [ ']'; '>'; ','; '\'' ] >>% ()))
+        let! typeDescription = sepBy1 typeDescription (pchar '+')
 
         return
             { Namespace = ns
-              TypeName = tn
-              TypeVariables = tv |> Option.defaultValue [] }
+              TypeDescription = typeDescription }
     }
 
-let parseType: Parser<TypeDescription, unit> =
-    parseFullType
-    >>= (fun (t: TypeDescription) ->
-        if List.isEmpty t.Namespace && List.isEmpty t.TypeVariables then
+let parseType: Parser<FullyQualifiedTypeDescription, unit> =
+    fullyQualifiedTypeDescription
+    >>= (fun (t: FullyQualifiedTypeDescription) ->
+        if List.isEmpty t.Namespace && List.isEmpty t.TypeDescription[0].TypeVariables then // Todo
             fail "Type does not have namespace or type variables"
         else
             preturn t)

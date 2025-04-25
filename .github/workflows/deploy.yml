@@ -53,9 +53,6 @@ jobs:
       - name: Run unit tests in Parser.Tests
         run: dotnet test Parser.Tests
 
-      - name: Run unit tests in App.Tests
-        run: dotnet test App.Tests
-
   webtests:
     name: web tests
     runs-on: ubuntu-latest

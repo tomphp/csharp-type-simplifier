@@ -77,3 +77,29 @@ type Tests() =
                 output
             )
         }
+
+    [<Xunit.Fact>]
+    member this.``add line breaks with inner types``() =
+        task {
+            do! this.VisitPage()
+
+            do! this.ClickAddLineBreaks()
+
+            do!
+                this.InputMessage(
+                    "Unable to resolve service for type
+                    'Example.MyClass`1+InnerOne`1[System.String,System.Int32]'
+                    while attempting to activate
+                    'Example.MyClass`1+InnerTwo`1[System.String,System.Int32]'."
+                )
+
+            let! output = this.OutputText()
+
+            Xunit.Assert.Matches(
+                "Unable to resolve service for type.*<br>.*"
+                + ".*MyClass.*<.*T1.*>.*\..*InnerOne.*<.*String.*, .*Int32.*>.*<br>.*"
+                + "while attempting to activate.*<br>.*"
+                + ".*MyClass.*<.*T1.*>.*\..*InnerTwo.*<.*String.*, .*Int32.*>.*<br>.*",
+                output
+            )
+        }

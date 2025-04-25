@@ -6,7 +6,7 @@ open Parser.MessageParser
 open Parser.TypeParser
 open Web.Model
 
-let private renderNamespace (description: TypeDescription) : Node =
+let private renderNamespace (description: FullyQualifiedTypeDescription) : Node =
     concat {
         for n in description.Namespace do
             span {
@@ -40,22 +40,30 @@ let private surround (left: Node) (right: Node) (content: Node) =
         right
     }
 
-let private renderTypeVars (renderType: TypeDescription -> Node) : TypeDescription -> Node =
+let private renderTypeVars (renderType: FullyQualifiedTypeDescription -> Node) : TypeDescription -> Node =
     _.TypeVariables
     >> List.map renderType
     >> intersperse (text ", ")
     >> surround (text "<") (text ">")
 
+let private renderType (renderType: FullyQualifiedTypeDescription -> Node) (description: TypeDescription) : Node =
+    concat {
+        renderTypename description
+
+        if description.TypeVariables.Length > 0 then
+            renderTypeVars renderType description
+    }
+
 // fsharplint:disable-next-line UnneededRecKeyword
-let rec private renderType (model: Model) (description: TypeDescription) : Node =
+let rec private renderFullyQualifiedType (model: Model) (description: FullyQualifiedTypeDescription) : Node =
     concat {
         if model.ShowNamespaces then
             renderNamespace description
 
-        renderTypename description
-
-        if description.TypeVariables.Length > 0 then
-            renderTypeVars (renderType model) description
+        intersperse
+            (text ".")
+            (description.TypeDescription
+             |> List.map (renderType (renderFullyQualifiedType model)))
     }
 
 let private renderText (content: string) : Node =
@@ -70,7 +78,7 @@ let renderMessage model (msg: MessagePart list) =
 
         for part in msg do
             match part with
-            | Type t -> renderType model t
+            | Type t -> renderFullyQualifiedType model t
             | Text t -> renderText t
 
             if model.AddLineBreaks then
