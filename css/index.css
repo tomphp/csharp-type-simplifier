@@ -38,6 +38,7 @@ body {
   padding: 10px;
   overflow: auto;
   border-left: 4px solid #29adff;
+  white-space: pre-wrap;
 }
 
 .message {
