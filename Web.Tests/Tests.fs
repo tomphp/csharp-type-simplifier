@@ -18,6 +18,9 @@ type Tests() =
     member private this.ClickAddLineBreaks() =
         this.Page.GetByLabel("Add line breaks").ClickAsync()
 
+    member private this.ClickAddExample() =
+        this.Page.GetByText("adding an example message").ClickAsync()
+
     member private this.ExpectOutput() =
         this.Expect(this.Page.GetByLabel("Result"))
 
@@ -102,4 +105,17 @@ type Tests() =
                 + ".*MyClass.*<.*T1.*>.*\..*InnerTwo.*<.*String.*, .*Int32.*>.*<br>.*",
                 output
             )
+        }
+
+
+    [<Xunit.Fact>]
+    member this.``add example message``() =
+        task {
+            do! this.VisitPage()
+
+            do! this.ClickAddExample()
+
+            let! output = this.OutputText()
+
+            Xunit.Assert.Matches("Unable to resolve service for type", output)
         }

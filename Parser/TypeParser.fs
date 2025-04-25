@@ -66,7 +66,7 @@ fullyQualifiedTypeDescriptionRef.Value <-
 let parseType: Parser<FullyQualifiedTypeDescription, unit> =
     fullyQualifiedTypeDescription
     >>= (fun (t: FullyQualifiedTypeDescription) ->
-        if List.isEmpty t.Namespace && List.isEmpty t.TypeDescription[0].TypeVariables then // Todo
+        if List.isEmpty t.Namespace && List.isEmpty t.TypeDescription[0].TypeVariables then
             fail "Type does not have namespace or type variables"
         else
             preturn t)
