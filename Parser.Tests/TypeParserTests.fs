@@ -146,6 +146,17 @@ let ``parseType given inner type returns inner type list`` (str, ns: string, typ
 
     actual |> should equal expected
 
+[<Theory>]
+[<InlineData(":")>]
+[<InlineData("]")>]
+[<InlineData(">")>]
+[<InlineData(",")>]
+[<InlineData("'")>]
+let ``parseType give type followed by ending char returns ok`` (char) =
+    let actual = parseType $"str{char}"
+
+    Result.isOk actual |> should equal true
+
 [<Fact>]
 let ``parseType given inner type with generics returns inner type list`` () =
     let actual = parseType "A.B<C>+D<E.F+G>"

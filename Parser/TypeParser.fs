@@ -46,7 +46,7 @@ let private typeDescription =
     parse {
         let! name = namespaceOrTypeName
         let! vars = (opt typeVars) |>> Option.defaultValue []
-        do! followedBy (eof <|> spaces1 <|> (anyOf [ ']'; '>'; ','; '\''; '+' ] >>% ()))
+        do! followedBy (eof <|> spaces1 <|> (anyOf (Seq.toList "];>,'+:") >>% ()))
 
         return
             { TypeName = name
